@@ -1,7 +1,9 @@
 import { JwtPayload } from "jsonwebtoken";
 import catchAsyncError from "../middlewares/catchAsyncErrors";
+import Image from "../models/image.model";
 import Project from "../models/project.model";
 import sendResponse from "../utils/sendResponse";
+import { sendImageToCloudinary } from "../utils/uploadFile";
 
 export const getProjectById = catchAsyncError(async (req, res) => {
   const user = req.user as JwtPayload;
@@ -17,7 +19,9 @@ export const getProjectById = catchAsyncError(async (req, res) => {
     });
   }
 
-  if (isExist.user !== user.id) {
+  const auth: any = isExist.toObject().user;
+
+  if (!auth._id || auth._id.toString() !== user.id) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",
@@ -59,7 +63,9 @@ export const updateProjectShapes = catchAsyncError(async (req, res) => {
     });
   }
 
-  if (isExist.user !== user.id) {
+  const auth: any = isExist.toObject().user;
+
+  if (!auth._id || auth._id.toString() !== user.id) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",
@@ -96,7 +102,9 @@ export const deleteProject = catchAsyncError(async (req, res) => {
     });
   }
 
-  if (isExist.user !== user.id) {
+  const auth: any = isExist.toObject().user;
+
+  if (!auth._id || auth._id.toString() !== user.id) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",
@@ -112,5 +120,37 @@ export const deleteProject = catchAsyncError(async (req, res) => {
     message: "project deleted succesfuly",
     success: true,
     statusCode: 200,
+  });
+});
+
+export const uploadImage = catchAsyncError(async (req, res) => {
+  const file = req.file;
+  const user = req.user as JwtPayload;
+  if (!file) {
+    return sendResponse(res, {
+      message: "file not found",
+      success: false,
+      data: null,
+      statusCode: 404,
+    });
+  }
+  const uploadRes: any = await sendImageToCloudinary(file.filename, file.path);
+
+  await Image.create({ url: uploadRes.secure_url, user: user.id });
+
+  sendResponse(res, {
+    data: uploadRes.secure_url,
+    message: "image uploaded",
+    success: true,
+  });
+});
+export const getAllImages = catchAsyncError(async (req, res) => {
+  const user = req.user as JwtPayload;
+
+  const result = await Image.find({ user: user.id });
+  sendResponse(res, {
+    data: result,
+    success: true,
+    message: "Successfully get user images",
   });
 });

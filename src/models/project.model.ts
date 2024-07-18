@@ -14,8 +14,8 @@ const ShapeSchema = new Schema({
   width: { type: Number, required: true },
   height: { type: Number, required: true },
   id: { type: String, required: true },
-  color: { type: String, required: true },
-  rotation: { type: Number, required: true },
+  color: { type: String, required: false, default: "#000" },
+  rotation: { type: Number, required: false, default: 0 },
   type: {
     type: String,
     required: true,
@@ -28,15 +28,22 @@ const ShapeSchema = new Schema({
   textStyle: { type: TextStyleSchema },
 });
 
-const ProjectSchema = new Schema({
-  projectName: { type: String, required: false, default: "Untitle project" },
-  user: { type: Schema.Types.ObjectId, required: true, ref: "Authentication" },
-  canvas: {
-    width: { type: Number, required: true },
-    height: { type: Number, required: true },
+const ProjectSchema = new Schema(
+  {
+    projectName: { type: String, required: false, default: "Untitle project" },
+    user: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Authentication",
+    },
+    canvas: {
+      width: { type: Number, required: true },
+      height: { type: Number, required: true },
+    },
+    shapes: { type: [ShapeSchema], required: false, default: [] },
   },
-  shapes: { type: [ShapeSchema], required: false, default: [] },
-});
+  { timestamps: true }
+);
 
 const Project = model("Project", ProjectSchema);
 

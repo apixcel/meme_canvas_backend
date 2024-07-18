@@ -5,6 +5,20 @@ import Project from "../models/project.model";
 import sendResponse from "../utils/sendResponse";
 import { sendImageToCloudinary } from "../utils/uploadFile";
 
+export const getAllProjects = catchAsyncError(async (req, res) => {
+  const user = req.user as JwtPayload;
+  console.log(user.id);
+
+  const isExist = await Project.find({ user: user.id })
+    .select("projectName createdAt updatedAt")
+    .sort({ updatedAt: -1 });
+
+  sendResponse(res, {
+    data: isExist,
+    success: true,
+    message: "projects retrived successfully",
+  });
+});
 export const getProjectById = catchAsyncError(async (req, res) => {
   const user = req.user as JwtPayload;
   const { id } = req.params;

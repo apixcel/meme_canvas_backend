@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createProjectController,
   getAllImages,
+  getAllProjects,
   getProjectById,
   updateProjectShapes,
   uploadImage,
@@ -14,6 +15,7 @@ router.get("/get/:id", isAuthenticatedUser, getProjectById);
 router.post("/create", isAuthenticatedUser, createProjectController);
 router.patch("/update/:id", isAuthenticatedUser, updateProjectShapes);
 router.delete("/delete/:id", isAuthenticatedUser, updateProjectShapes);
+router.get("/all", isAuthenticatedUser, getAllProjects);
 router.post(
   "/upload/image",
   isAuthenticatedUser,

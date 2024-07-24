@@ -15,8 +15,8 @@ const ShapeSchema = new mongoose_1.Schema({
     width: { type: Number, required: true },
     height: { type: Number, required: true },
     id: { type: String, required: true },
-    color: { type: String, required: true },
-    rotation: { type: Number, required: true },
+    color: { type: String, required: false, default: "#000" },
+    rotation: { type: Number, required: false, default: 0 },
     type: {
         type: String,
         required: true,
@@ -30,12 +30,16 @@ const ShapeSchema = new mongoose_1.Schema({
 });
 const ProjectSchema = new mongoose_1.Schema({
     projectName: { type: String, required: false, default: "Untitle project" },
-    user: { type: mongoose_1.Schema.Types.ObjectId, required: true, ref: "Authentication" },
+    user: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        required: true,
+        ref: "Authentication",
+    },
     canvas: {
         width: { type: Number, required: true },
         height: { type: Number, required: true },
     },
     shapes: { type: [ShapeSchema], required: false, default: [] },
-});
+}, { timestamps: true });
 const Project = (0, mongoose_1.model)("Project", ProjectSchema);
 exports.default = Project;

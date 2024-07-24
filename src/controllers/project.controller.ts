@@ -7,7 +7,6 @@ import { sendImageToCloudinary } from "../utils/uploadFile";
 
 export const getAllProjects = catchAsyncError(async (req, res) => {
   const user = req.user as JwtPayload;
-  console.log(user.id);
 
   const isExist = await Project.find({ user: user.id })
     .select("projectName createdAt updatedAt")
@@ -91,6 +90,45 @@ export const updateProjectShapes = catchAsyncError(async (req, res) => {
     id,
     {
       $set: { shapes: body },
+    },
+    { runValidators: true, new: true }
+  );
+
+  sendResponse(res, {
+    data: result,
+    message: "project created successfuly",
+    success: true,
+  });
+});
+export const renameProject = catchAsyncError(async (req, res) => {
+  const { projectName } = req.body;
+  const { id } = req.params;
+  const user = req.user as JwtPayload;
+
+  const isExist = await Project.findById(id).populate("user");
+
+  if (!isExist) {
+    return sendResponse(res, {
+      data: null,
+      success: false,
+      message: "project not found on this id",
+    });
+  }
+
+  const auth: any = isExist.toObject().user;
+
+  if (!auth._id || auth._id.toString() !== user.id) {
+    return sendResponse(res, {
+      success: false,
+      message: "forbiden access",
+      statusCode: 403,
+      data: null,
+    });
+  }
+  const result = await Project.findByIdAndUpdate(
+    id,
+    {
+      $set: { projectName },
     },
     { runValidators: true, new: true }
   );

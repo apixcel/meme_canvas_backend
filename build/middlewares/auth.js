@@ -34,7 +34,7 @@ const isAuthenticatedUser = (req, res, next) => __awaiter(void 0, void 0, void 0
             _id: (_a = decoded === null || decoded === void 0 ? void 0 : decoded.user) === null || _a === void 0 ? void 0 : _a.id,
         }).select("-password");
         if (!user)
-            return res.status(400).json({ message: "User does not exist." });
+            return res.status(404).json({ message: "User does not exist." });
         // console.log("user =======", user);
         req.user = user;
         next();

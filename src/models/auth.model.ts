@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 
 export interface IAuthentication {
-  role?: "customer";
+  role?: "user" | "admin";
   firstName: string;
   lastName: string;
   email: string;
@@ -13,7 +13,7 @@ const AuthenticationSchema = new mongoose.Schema(
   {
     role: {
       type: String,
-      enum: ["customer"],
+      enum: ["user", "admin"],
       required: false,
       default: "user",
     },
@@ -34,6 +34,11 @@ const AuthenticationSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+    },
+    image: {
+      type: String,
+      required: false,
+      default: "",
     },
   },
   { timestamps: true }

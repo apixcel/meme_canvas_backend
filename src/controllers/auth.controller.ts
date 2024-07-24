@@ -8,9 +8,10 @@ import { createAcessToken, createRefreshToken } from "../utils/jwtToken";
 import sendResponse from "../utils/sendResponse";
 export const authSateController = catchAsyncError(async (req, res) => {
   const user = req.user;
+
   res.json({ success: true, message: "User state get", data: user });
 });
-export const createCustomerController = catchAsyncError(async (req, res) => {
+export const createUserController = catchAsyncError(async (req, res) => {
   const { body } = req;
 
   const isExistCustomer = await Authentication.findOne({ email: body.email });
@@ -55,7 +56,14 @@ export const genereteAccessToken = catchAsyncError(async (req, res) => {
     return res.status(400).json({ msg: "Invalid Authentication." });
 
   const refreshToken = getToken.split(" ")[1];
-  console.log({ refreshToken });
+  if (!refreshToken) {
+    sendResponse(res, {
+      message: "token must be provided",
+      success: false,
+      data: null,
+      statusCode: 400,
+    });
+  }
 
   const refreshTokenSecret = process.env.JWT_REFRESH_SECRET as string;
 

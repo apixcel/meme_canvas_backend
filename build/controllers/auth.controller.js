@@ -68,7 +68,6 @@ exports.genereteAccessToken = (0, catchAsyncErrors_1.default)((req, res) => __aw
     if (!getToken)
         return res.status(400).json({ msg: "Invalid Authentication." });
     const refreshToken = getToken.split(" ")[1];
-    console.log({ refreshToken });
     const refreshTokenSecret = process.env.JWT_REFRESH_SECRET;
     try {
         const decoded = jsonwebtoken_1.default.verify(refreshToken, refreshTokenSecret);

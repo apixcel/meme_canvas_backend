@@ -24,7 +24,7 @@ export const createUserController = catchAsyncError(async (req, res) => {
     });
   }
 
-  const auth = await Authentication.create({ ...body, role: "customer" });
+  const auth = await Authentication.create({ ...body });
 
   const token = createAcessToken(
     {
@@ -111,7 +111,6 @@ export const loginController = catchAsyncError(async (req, res) => {
       statusCode: 404,
     });
   }
-
   const isPasswordMatched = await bcrypt.compare(
     password,
     isExistUser.password
@@ -121,6 +120,7 @@ export const loginController = catchAsyncError(async (req, res) => {
       message: "password didn't matched",
       success: false,
       data: null,
+      statusCode: 403,
     });
   }
 
@@ -182,12 +182,12 @@ export const resetPassword = catchAsyncError(async (req: any, res, next) => {
       message: "password didn't matched",
       data: null,
       success: false,
-      statusCode: 403,
+      statusCode: 401,
     });
   }
 
   // create new hash password
-  const newPass = await bcrypt.hash(password, 15);
+  const newPass = await bcrypt.hash(password, 10);
 
   // update the new
   const updatePassword = await Authentication.findOneAndUpdate(
@@ -209,7 +209,6 @@ export const resetPassword = catchAsyncError(async (req: any, res, next) => {
 // forgot-password controller
 export const forgotPassword = catchAsyncError(async (req, res) => {
   const { email } = req.body;
-  console.log(req.body);
 
   const user = await Authentication.findOne({ email });
 
@@ -231,9 +230,7 @@ export const forgotPassword = catchAsyncError(async (req, res) => {
       expiresIn: "5m",
     }
   );
-  console.log(
-    `${process.env.FRONTEND_BASE_URL}/recover-password?token=${token}`
-  );
+  console.log(`${process.env.FRONTEND_BASE_URL}/recover-password/${token}`);
 
   sendMessage(
     "legendxpro123455@gmail.com",
@@ -249,11 +246,11 @@ export const forgotPassword = catchAsyncError(async (req, res) => {
               <p>Hello,</p>
               <p>We received a request to reset your password. Click the button below to reset it.</p>
               <div style="text-align: center; margin: 20px 0;">
-                  <a href="${process.env.FRONTEND_BASE_URL}/recover-password?token=${token}" style="display: inline-block; padding: 10px 20px; background-color: #00466a; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+                  <a href="${process.env.FRONTEND_BASE_URL}/recover-password/${token}" style="display: inline-block; padding: 10px 20px; background-color: #00466a; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
               </div>
               <p>If you did not request a password reset, please ignore this email.</p>
               <p>Thanks,</p>
-              <p>Fresh Blogs</p>
+              <p>Memes canvas</p>
           </div>
           <div style="text-align: center; background-color: #f1f1f1; color: #555; padding: 10px;">
               <p style="margin: 0;">&copy; 2024 Fresh Blogs. All rights reserved.</p>
@@ -271,15 +268,39 @@ export const forgotPassword = catchAsyncError(async (req, res) => {
 // Resetting new password
 export const recoverPassword = catchAsyncError(async (req, res) => {
   const { password } = req.body;
-  const token = req.header("Authorization");
+  const getToken = req.header("Authorization");
+
+  if (!getToken) {
+    return sendResponse(res, {
+      message: "Token is not provided",
+      data: null,
+      success: false,
+    });
+  }
+  const token = getToken.split(" ")[1];
+
   if (!token || !password) {
     return res.status(400).json({ error: "Token and password are required" });
   }
 
-  const decoded: any = jwt.verify(
-    token,
-    process.env.JWT_ACCESS_SECRET as string
-  );
+  let decoded;
+
+  try {
+    const decode: any = jwt.verify(
+      token,
+      process.env.JWT_ACCESS_SECRET as string
+    );
+
+    decoded = decode;
+  } catch (error) {
+    sendResponse(res, {
+      data: null,
+      message: "invalid authentication",
+      statusCode: 401,
+      success: false,
+    });
+    return;
+  }
 
   if (!decoded)
     return res
@@ -291,7 +312,7 @@ export const recoverPassword = catchAsyncError(async (req, res) => {
   });
 
   if (!user) {
-    return res.status(400).json({
+    return res.status(404).json({
       success: false,
       data: null,
       message: "User not found",
@@ -301,6 +322,11 @@ export const recoverPassword = catchAsyncError(async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   user.password = hashedPassword;
+
+  await Authentication.findByIdAndUpdate(user._id, {
+    password: hashedPassword,
+  });
+
   const tokenPayload = {
     email: user.email,
     id: user._id.toString(),
@@ -308,8 +334,6 @@ export const recoverPassword = catchAsyncError(async (req, res) => {
   };
 
   const accessToken = createAcessToken(tokenPayload, "1h");
-
-  await user.save();
 
   res.status(200).json({
     success: true,

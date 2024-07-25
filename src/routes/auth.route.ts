@@ -17,6 +17,6 @@ router.get("/auth-state", isAuthenticatedUser, authSateController);
 router.post("/refreshToken", genereteAccessToken);
 router.put("/reset-password", isAuthenticatedUser, resetPassword);
 router.post("/forgot-password", forgotPassword);
-router.put("recover-password", recoverPassword);
+router.put("/recover-password", recoverPassword);
 const authRoute = router;
 export default authRoute;

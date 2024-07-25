@@ -1,6 +1,11 @@
 import jwt from "jsonwebtoken";
 
-export const createAcessToken = (user: object, expires: string) => {
+export interface ITokenPayload {
+  email: string;
+  role: string;
+  id: string;
+}
+export const createAcessToken = (user: ITokenPayload, expires: string) => {
   return jwt.sign({ user }, process.env.JWT_ACCESS_SECRET as string, {
     expiresIn: expires,
   });

@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-const TextStyleSchema = new Schema({
+export const TextStyleSchema = new Schema({
   fontSize: { type: Number },
   fontFamily: { type: String },
   fontWeight: { type: Number, enum: [300, 400, 500, 600, 700] },
@@ -8,7 +8,7 @@ const TextStyleSchema = new Schema({
   textAlign: { type: String, enum: ["center", "start", "end"] },
 });
 
-const ShapeSchema = new Schema({
+export const ShapeSchema = new Schema({
   x: { type: Number, required: true },
   y: { type: Number, required: true },
   width: { type: Number, required: true },
@@ -37,10 +37,14 @@ const ProjectSchema = new Schema(
       ref: "Authentication",
     },
     canvas: {
-      width: { type: Number, required: true },
-      height: { type: Number, required: true },
+      type: {
+        width: { type: Number, required: true },
+        height: { type: Number, required: true },
+      },
+      required: true,
     },
     shapes: { type: [ShapeSchema], required: false, default: [] },
+    template: { type: Schema.Types.ObjectId, required: false },
   },
   { timestamps: true }
 );

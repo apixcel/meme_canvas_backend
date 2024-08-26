@@ -8,7 +8,7 @@ import { sendImageToCloudinary } from "../utils/uploadFile";
 export const getAllProjects = catchAsyncError(async (req, res) => {
   const user = req.user as JwtPayload;
 
-  const isExist = await Project.find({ user: user.id })
+  const isExist = await Project.find({ user: user._id })
     .select("projectName createdAt updatedAt")
     .sort({ updatedAt: -1 });
 
@@ -34,7 +34,7 @@ export const getProjectById = catchAsyncError(async (req, res) => {
 
   const auth: any = isExist.toObject().user;
 
-  if (!auth._id || auth._id.toString() !== user.id) {
+  if (!auth._id || auth._id.toString() !== user._id) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",
@@ -53,7 +53,7 @@ export const getProjectById = catchAsyncError(async (req, res) => {
 export const createProjectController = catchAsyncError(async (req, res) => {
   const { body } = req;
   const user = req.user as JwtPayload;
-  const result = await Project.create({ ...body, user: user.id });
+  const result = await Project.create({ ...body, user: user._id });
 
   sendResponse(res, {
     data: result,
@@ -78,7 +78,7 @@ export const updateProjectShapes = catchAsyncError(async (req, res) => {
 
   const auth: any = isExist.toObject().user;
 
-  if (!auth._id || auth._id.toString() !== user.id) {
+  if (!auth._id || auth._id.toString() !== user._id) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",
@@ -117,7 +117,7 @@ export const renameProject = catchAsyncError(async (req, res) => {
 
   const auth: any = isExist.toObject().user;
 
-  if (!auth._id || auth._id.toString() !== user.id) {
+  if (!auth._id || auth._id.toString() !== user._id) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",
@@ -156,7 +156,7 @@ export const deleteProject = catchAsyncError(async (req, res) => {
 
   const auth: any = isExist.toObject().user;
 
-  if (!auth._id || auth._id.toString() !== user.id) {
+  if (auth._id || auth._id.toString() !== user._id.toString()) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",
@@ -188,7 +188,7 @@ export const uploadImage = catchAsyncError(async (req, res) => {
   }
   const uploadRes: any = await sendImageToCloudinary(file.filename, file.path);
 
-  await Image.create({ url: uploadRes.secure_url, user: user.id });
+  await Image.create({ url: uploadRes.secure_url, user: user._id });
 
   sendResponse(res, {
     data: uploadRes.secure_url,
@@ -199,7 +199,7 @@ export const uploadImage = catchAsyncError(async (req, res) => {
 export const getAllImages = catchAsyncError(async (req, res) => {
   const user = req.user as JwtPayload;
 
-  const result = await Image.find({ user: user.id });
+  const result = await Image.find({ user: user._id });
   sendResponse(res, {
     data: result,
     success: true,

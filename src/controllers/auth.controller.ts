@@ -29,7 +29,7 @@ export const createUserController = catchAsyncError(async (req, res) => {
   const token = createAcessToken(
     {
       email: auth.email,
-      id: auth._id.toString(),
+      _id: auth._id.toString(),
       role: auth.role as string,
     },
     "1h"
@@ -73,11 +73,11 @@ export const genereteAccessToken = catchAsyncError(async (req, res) => {
     const user = (decoded as JwtPayload).user;
     const accessTOkenPayload = {
       email: user.email,
-      id: user.id,
+      _id: user._id,
       role: user.role,
     };
 
-    const isExistUser = await Authentication.findById(user.id);
+    const isExistUser = await Authentication.findById(user._id);
     if (!isExistUser) {
       return sendResponse(res, {
         success: false,
@@ -127,7 +127,7 @@ export const loginController = catchAsyncError(async (req, res) => {
   const token = createAcessToken(
     {
       email: isExistUser.email,
-      id: isExistUser._id.toString() as string,
+      _id: isExistUser._id.toString() as string,
       role: isExistUser.role as string,
     },
     "1h"
@@ -164,7 +164,6 @@ export const resetPassword = catchAsyncError(async (req: any, res, next) => {
   }
 
   const theUser = await Authentication.findOne({ email });
-
   // check if there no user
   if (!theUser) {
     return sendResponse(res, {
@@ -329,7 +328,7 @@ export const recoverPassword = catchAsyncError(async (req, res) => {
 
   const tokenPayload = {
     email: user.email,
-    id: user._id.toString(),
+    _id: user._id.toString(),
     role: user.role as string,
   };
 

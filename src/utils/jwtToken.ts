@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 export interface ITokenPayload {
   email: string;
   role: string;
-  id: string;
+  _id: string;
 }
 export const createAcessToken = (user: ITokenPayload, expires: string) => {
   return jwt.sign({ user }, process.env.JWT_ACCESS_SECRET as string, {

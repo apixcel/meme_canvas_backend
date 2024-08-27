@@ -6,7 +6,7 @@ import sendResponse from "../utils/sendResponse";
 
 // create  project from chosen template
 export const chooseTemplate = catchAsyncError(async (req, res) => {
-  const templateId = req.params.templateId;
+  const templateId = req.params.id; // template id
   const user = req.user as JwtPayload;
   const isTemplateExists = await Template.findById(templateId);
   if (!isTemplateExists) {
@@ -38,6 +38,7 @@ export const chooseTemplate = catchAsyncError(async (req, res) => {
 export const createTemplate = catchAsyncError(async (req, res) => {
   const user = req.user as JwtPayload;
   const { id } = req.params; // project id
+  const { templateName } = req.body;
 
   const project = await Project.findById(id);
   if (!project) {
@@ -57,13 +58,14 @@ export const createTemplate = catchAsyncError(async (req, res) => {
     });
   }
 
-  const { canvas, projectName, shapes } = project.toObject();
+  const { canvas, projectName, shapes, thumbnail } = project.toObject();
 
   const result = await Template.create({
     canvas,
     owner: user._id,
-    projectName,
+    projectName: templateName || projectName,
     shapes,
+    thumbnail,
   });
 
   sendResponse(res, {
@@ -75,7 +77,7 @@ export const createTemplate = catchAsyncError(async (req, res) => {
 });
 
 export const getAllTemplates = catchAsyncError(async (req, res) => {
-  const result = await Template.find();
+  const result = await Template.find().populate("owner").select("-shapes");
 
   sendResponse(res, {
     data: result,

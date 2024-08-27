@@ -69,8 +69,10 @@ export const genereteAccessToken = catchAsyncError(async (req, res) => {
   const refreshTokenSecret = process.env.JWT_REFRESH_SECRET as string;
 
   try {
+    console.log({ refreshToken });
     const decoded = jwt.verify(refreshToken, refreshTokenSecret);
     const user = (decoded as JwtPayload).user;
+
     const accessTOkenPayload = {
       email: user.email,
       _id: user._id,
@@ -135,7 +137,7 @@ export const loginController = catchAsyncError(async (req, res) => {
 
   const refreshToken = createRefreshToken({
     email: isExistUser.email,
-    id: isExistUser._id,
+    _id: isExistUser._id,
     role: isExistUser.role,
   });
 

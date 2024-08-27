@@ -7,6 +7,7 @@ import {
   getProjectById,
   renameProject,
   updateProjectShapes,
+  updateProjectThubnail,
   uploadImage,
 } from "../controllers/project.controller";
 import { isAuthenticatedUser } from "../middlewares/auth";
@@ -17,6 +18,12 @@ router.get("/get/:id", isAuthenticatedUser, getProjectById);
 router.post("/create", isAuthenticatedUser, createProjectController);
 router.put("/rename/:id", isAuthenticatedUser, renameProject);
 router.put("/update/:id", isAuthenticatedUser, updateProjectShapes);
+router.put(
+  "/update-thumbnail/:id",
+  isAuthenticatedUser,
+  upload.single("file"),
+  updateProjectThubnail
+);
 router.delete("/delete/:id", isAuthenticatedUser, deleteProject);
 router.get("/all", isAuthenticatedUser, getAllProjects);
 router.post(

@@ -1,7 +1,9 @@
 import { JwtPayload } from "jsonwebtoken";
+import cloudinary from "../config/cloud";
 import catchAsyncError from "../middlewares/catchAsyncErrors";
 import Image from "../models/image.model";
 import Project from "../models/project.model";
+import { getPublicId } from "../utils/getPublicId";
 import sendResponse from "../utils/sendResponse";
 import { sendImageToCloudinary } from "../utils/uploadFile";
 
@@ -9,7 +11,7 @@ export const getAllProjects = catchAsyncError(async (req, res) => {
   const user = req.user as JwtPayload;
 
   const isExist = await Project.find({ user: user._id })
-    .select("projectName createdAt updatedAt")
+    .select("projectName createdAt updatedAt thumbnail")
     .sort({ updatedAt: -1 });
 
   sendResponse(res, {
@@ -34,7 +36,7 @@ export const getProjectById = catchAsyncError(async (req, res) => {
 
   const auth: any = isExist.toObject().user;
 
-  if (!auth._id || auth._id.toString() !== user._id) {
+  if (!auth._id || auth._id.toString() !== user._id.toString()) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",
@@ -78,7 +80,7 @@ export const updateProjectShapes = catchAsyncError(async (req, res) => {
 
   const auth: any = isExist.toObject().user;
 
-  if (!auth._id || auth._id.toString() !== user._id) {
+  if (!auth._id || auth._id.toString() !== user._id.toString()) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",
@@ -86,6 +88,7 @@ export const updateProjectShapes = catchAsyncError(async (req, res) => {
       data: null,
     });
   }
+  
   const result = await Project.findByIdAndUpdate(
     id,
     {
@@ -97,6 +100,64 @@ export const updateProjectShapes = catchAsyncError(async (req, res) => {
   sendResponse(res, {
     data: result,
     message: "project created successfuly",
+    success: true,
+  });
+});
+export const updateProjectThubnail = catchAsyncError(async (req, res) => {
+  const { body } = req;
+  const { id } = req.params;
+
+  const user = req.user as JwtPayload;
+  const file = req.file;
+  if (!file) {
+    return sendResponse(res, {
+      message: "file not found",
+      success: false,
+      data: null,
+      statusCode: 404,
+    });
+  }
+  const isExist = await Project.findById(id).populate("user");
+
+  if (!isExist) {
+    return sendResponse(res, {
+      data: null,
+      success: false,
+      message: "project not found on this id",
+    });
+  }
+
+  const asset_public_id = getPublicId(isExist.thumbnail);
+
+  if (asset_public_id) {
+    const result1 = await cloudinary.uploader.destroy(
+      asset_public_id as string
+    );
+  }
+
+  const uploadRes: any = await sendImageToCloudinary(file.filename, file.path);
+
+  const auth: any = isExist.toObject().user;
+
+  if (!auth._id || auth._id.toString() !== user._id.toString()) {
+    return sendResponse(res, {
+      success: false,
+      message: "forbiden access",
+      statusCode: 403,
+      data: null,
+    });
+  }
+  const result = await Project.findByIdAndUpdate(
+    id,
+    {
+      $set: { thumbnail: uploadRes.secure_url || "" },
+    },
+    { runValidators: true, new: true }
+  );
+
+  sendResponse(res, {
+    data: result,
+    message: "project thubmain updated successfuly",
     success: true,
   });
 });
@@ -117,7 +178,7 @@ export const renameProject = catchAsyncError(async (req, res) => {
 
   const auth: any = isExist.toObject().user;
 
-  if (!auth._id || auth._id.toString() !== user._id) {
+  if (!auth._id || auth._id.toString() !== user._id.toString()) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",

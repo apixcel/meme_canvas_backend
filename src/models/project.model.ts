@@ -31,6 +31,7 @@ export const ShapeSchema = new Schema({
 const ProjectSchema = new Schema(
   {
     projectName: { type: String, required: false, default: "Untitle project" },
+    thumbnail: { type: String, required: true, default: "/images/white.jpg" },
     user: {
       type: Schema.Types.ObjectId,
       required: true,
@@ -44,7 +45,10 @@ const ProjectSchema = new Schema(
       required: true,
     },
     shapes: { type: [ShapeSchema], required: false, default: [] },
-    template: { type: Schema.Types.ObjectId, required: false },
+    template: {
+      type: Schema.Types.ObjectId,
+      required: false,
+    },
   },
   { timestamps: true }
 );

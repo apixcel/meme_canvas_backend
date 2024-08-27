@@ -1,7 +1,8 @@
 import express from "express";
 import authRoute from "./auth.route";
 import projectRoutes from "./project.route";
-import userRoute from "./route";
+import userRoute from "./user.route";
+import templateRoute from "./template.route";
 
 const router = express.Router();
 
@@ -17,6 +18,10 @@ const moduleRoute = [
   {
     path: "/user",
     route: userRoute,
+  },
+  {
+    path: "/template",
+    route: templateRoute,
   },
 ];
 

@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const auth_route_1 = __importDefault(require("./auth.route"));
 const project_route_1 = __importDefault(require("./project.route"));
+const user_route_1 = __importDefault(require("./user.route"));
+const template_route_1 = __importDefault(require("./template.route"));
 const router = express_1.default.Router();
 const moduleRoute = [
     {
@@ -15,6 +17,14 @@ const moduleRoute = [
     {
         path: "/project",
         route: project_route_1.default,
+    },
+    {
+        path: "/user",
+        route: user_route_1.default,
+    },
+    {
+        path: "/template",
+        route: template_route_1.default,
     },
 ];
 moduleRoute.forEach((route) => router.use(route.path, route.route));

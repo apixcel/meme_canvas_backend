@@ -9,6 +9,7 @@ router.get("/get/:id", auth_1.isAuthenticatedUser, project_controller_1.getProje
 router.post("/create", auth_1.isAuthenticatedUser, project_controller_1.createProjectController);
 router.put("/rename/:id", auth_1.isAuthenticatedUser, project_controller_1.renameProject);
 router.put("/update/:id", auth_1.isAuthenticatedUser, project_controller_1.updateProjectShapes);
+router.put("/update-thumbnail/:id", auth_1.isAuthenticatedUser, uploadFile_1.upload.single("file"), project_controller_1.updateProjectThubnail);
 router.delete("/delete/:id", auth_1.isAuthenticatedUser, project_controller_1.deleteProject);
 router.get("/all", auth_1.isAuthenticatedUser, project_controller_1.getAllProjects);
 router.post("/upload/image", auth_1.isAuthenticatedUser, uploadFile_1.upload.single("file"), project_controller_1.uploadImage);

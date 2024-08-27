@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ShapeSchema = exports.TextStyleSchema = void 0;
 const mongoose_1 = require("mongoose");
-const TextStyleSchema = new mongoose_1.Schema({
+exports.TextStyleSchema = new mongoose_1.Schema({
     fontSize: { type: Number },
     fontFamily: { type: String },
     fontWeight: { type: Number, enum: [300, 400, 500, 600, 700] },
@@ -9,7 +10,7 @@ const TextStyleSchema = new mongoose_1.Schema({
     textDecoration: { type: String, enum: ["underline"] },
     textAlign: { type: String, enum: ["center", "start", "end"] },
 });
-const ShapeSchema = new mongoose_1.Schema({
+exports.ShapeSchema = new mongoose_1.Schema({
     x: { type: Number, required: true },
     y: { type: Number, required: true },
     width: { type: Number, required: true },
@@ -26,20 +27,28 @@ const ShapeSchema = new mongoose_1.Schema({
     radius: { type: Number, required: true },
     imageUrl: { type: String },
     zIndex: { type: Number, required: true },
-    textStyle: { type: TextStyleSchema },
+    textStyle: { type: exports.TextStyleSchema },
 });
 const ProjectSchema = new mongoose_1.Schema({
     projectName: { type: String, required: false, default: "Untitle project" },
+    thumbnail: { type: String, required: true, default: "/images/white.jpg" },
     user: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: true,
         ref: "Authentication",
     },
     canvas: {
-        width: { type: Number, required: true },
-        height: { type: Number, required: true },
+        type: {
+            width: { type: Number, required: true },
+            height: { type: Number, required: true },
+        },
+        required: true,
     },
-    shapes: { type: [ShapeSchema], required: false, default: [] },
+    shapes: { type: [exports.ShapeSchema], required: false, default: [] },
+    template: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        required: false,
+    },
 }, { timestamps: true });
 const Project = (0, mongoose_1.model)("Project", ProjectSchema);
 exports.default = Project;

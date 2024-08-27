@@ -5,7 +5,7 @@ import http from "http";
 import connectDB from "./config/db";
 
 import errorMiddleware from "./middlewares/error";
-import routes from "./routes/index";
+import routes from "./routes";
 
 const app: Application = express();
 

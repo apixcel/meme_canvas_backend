@@ -24,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const server = http.createServer(app);
 
+app.get("/", (req, res) => res.send({ success: true }));
 app.use("/api/v1/", routes);
 
 // Middleware for Errors

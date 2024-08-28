@@ -1,14 +1,23 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = require("mongoose");
 class QueryBuilder {
     constructor(modelQuery, query) {
         this.modelQuery = modelQuery;
         this.query = query;
-        console.log("Initial query:", this.query);
+        this.totalCount = 0;
     }
     search(searchableFields) {
-        const searchTerm = this.query.searchTerm;
+        var _a;
+        const searchTerm = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.searchTerm;
         if (searchTerm) {
             this.modelQuery = this.modelQuery.find({
                 $or: searchableFields.map((field) => ({
@@ -20,75 +29,38 @@ class QueryBuilder {
     }
     filter() {
         const queryObj = Object.assign({}, this.query);
-        const excludeFields = [
-            "searchTerm",
-            "sort",
-            "limit",
-            "page",
-            "fields",
-            "minPrice",
-            "maxPrice",
-        ];
+        // Filtering
+        const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
         excludeFields.forEach((el) => delete queryObj[el]);
-        if (queryObj.category) {
-            queryObj.category = new mongoose_1.Types.ObjectId(queryObj.category);
-        }
-        let queryStr = JSON.stringify(queryObj);
-        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-        this.modelQuery = this.modelQuery.find(JSON.parse(queryStr));
-        console.log("Query after general filtering:", queryStr);
-        // Price filtering
-        if (this.query.minPrice || this.query.maxPrice) {
-            const priceFilter = {};
-            if (this.query.minPrice) {
-                priceFilter.$gte = Number(this.query.minPrice);
-            }
-            if (this.query.maxPrice) {
-                priceFilter.$lte = Number(this.query.maxPrice);
-            }
-            this.modelQuery = this.modelQuery.find({
-                price: priceFilter,
-            });
-        }
+        this.modelQuery = this.modelQuery.find(queryObj);
         return this;
     }
     sort() {
-        let sortBy = "-createdAt";
-        if (this.query.sort) {
-            switch (this.query.sort) {
-                case "price-asc":
-                    sortBy = "discountPrice";
-                    break;
-                case "price-desc":
-                    sortBy = "-discountPrice";
-                    break;
-                case "rating":
-                    sortBy = "-rating";
-                    break;
-                default:
-                    sortBy = this.query.sort;
-            }
-        }
-        this.modelQuery = this.modelQuery.sort(sortBy);
+        var _a, _b, _c;
+        const sort = ((_c = (_b = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.sort) === null || _b === void 0 ? void 0 : _b.split(",")) === null || _c === void 0 ? void 0 : _c.join(" ")) || "-createdAt";
+        this.modelQuery = this.modelQuery.sort(sort);
         return this;
     }
     paginate() {
-        const page = Number(this.query.page) || 1;
-        const limit = Number(this.query.limit) || 10;
+        var _a, _b;
+        const page = Number((_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.page) || 1;
+        const limit = Number((_b = this === null || this === void 0 ? void 0 : this.query) === null || _b === void 0 ? void 0 : _b.limit) || 10;
         const skip = (page - 1) * limit;
         this.modelQuery = this.modelQuery.skip(skip).limit(limit);
         return this;
     }
     fields() {
-        var _a, _b;
-        const fields = ((_b = (_a = this.query.fields) === null || _a === void 0 ? void 0 : _a.split(",")) === null || _b === void 0 ? void 0 : _b.join(" ")) || "-__v";
+        var _a, _b, _c;
+        const fields = ((_c = (_b = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.fields) === null || _b === void 0 ? void 0 : _b.split(",")) === null || _c === void 0 ? void 0 : _c.join(" ")) || "-__v";
         this.modelQuery = this.modelQuery.select(fields);
         return this;
     }
+    count() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const countQuery = this.modelQuery.model.countDocuments(this.modelQuery.getFilter());
+            this.totalCount = yield countQuery.exec();
+            return this;
+        });
+    }
 }
 exports.default = QueryBuilder;
-// case "price-asc":
-//   sortBy = "discountPrice";
-//   break;
-// case "price-desc":
-//   sortBy = "-discountPrice";

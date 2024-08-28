@@ -6,6 +6,7 @@ const auth_1 = require("../middlewares/auth");
 const router = (0, express_1.Router)();
 router.post("/create/:id", auth_1.isAuthenticatedUser, template_controler_1.createTemplate);
 router.get("/get", template_controler_1.getAllTemplates);
+router.post("/choose/:id", auth_1.isAuthenticatedUser, template_controler_1.chooseTemplate);
 router.delete("/delete/:id", auth_1.isAuthenticatedUser, template_controler_1.deleteTemplate);
 const templateRoute = router;
 exports.default = templateRoute;

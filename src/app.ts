@@ -1,6 +1,5 @@
 import cors from "cors";
 import express, { Application, NextFunction, Request, Response } from "express";
-import http from "http";
 // import morgan from "morgan";
 import connectDB from "./config/db";
 
@@ -21,8 +20,6 @@ connectDB();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const server = http.createServer(app);
 
 app.get("/", (req, res) => res.send({ success: true }));
 app.use("/api/v1/", routes);

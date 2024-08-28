@@ -13,6 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTemplate = exports.getAllTemplates = exports.createTemplate = exports.chooseTemplate = void 0;
+const QueryBuilder_1 = __importDefault(require("../builder/QueryBuilder"));
+const cloud_1 = __importDefault(require("../config/cloud"));
 const catchAsyncErrors_1 = __importDefault(require("../middlewares/catchAsyncErrors"));
 const project_model_1 = __importDefault(require("../models/project.model"));
 const template_model_1 = __importDefault(require("../models/template.model"));
@@ -28,6 +30,16 @@ exports.chooseTemplate = (0, catchAsyncErrors_1.default)((req, res) => __awaiter
             data: null,
             success: false,
             statusCode: 400,
+        });
+    }
+    const alreadyChoosed = yield project_model_1.default.findOne({
+        template: isTemplateExists._id,
+    });
+    if (alreadyChoosed) {
+        return (0, sendResponse_1.default)(res, {
+            data: alreadyChoosed,
+            success: false,
+            message: "this template is already choosed",
         });
     }
     const { canvas, projectName, shapes, _id } = isTemplateExists.toObject();
@@ -65,12 +77,13 @@ exports.createTemplate = (0, catchAsyncErrors_1.default)((req, res) => __awaiter
         });
     }
     const { canvas, projectName, shapes, thumbnail } = project.toObject();
+    const cloudinaryResult = yield cloud_1.default.uploader.upload(thumbnail);
     const result = yield template_model_1.default.create({
         canvas,
         owner: user._id,
         projectName: templateName || projectName,
         shapes,
-        thumbnail,
+        thumbnail: cloudinaryResult.secure_url,
     });
     (0, sendResponse_1.default)(res, {
         data: result,
@@ -80,11 +93,15 @@ exports.createTemplate = (0, catchAsyncErrors_1.default)((req, res) => __awaiter
     });
 }));
 exports.getAllTemplates = (0, catchAsyncErrors_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield template_model_1.default.find().populate("owner").select("-shapes");
-    (0, sendResponse_1.default)(res, {
+    const query = template_model_1.default.find().populate("owner").select("-shapes");
+    const builder = new QueryBuilder_1.default(query, req.query).search(["projectName"]);
+    const totalDoc = (yield builder.count()).totalCount;
+    const result = yield builder.modelQuery;
+    res.json({
         data: result,
-        message: "Project created form template",
+        message: "successfully get all template",
         success: true,
+        totalDoc,
     });
 }));
 exports.deleteTemplate = (0, catchAsyncErrors_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

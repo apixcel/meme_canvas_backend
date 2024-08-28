@@ -183,7 +183,7 @@ exports.deleteProject = (0, catchAsyncErrors_1.default)((req, res) => __awaiter(
         });
     }
     const auth = isExist.toObject().user;
-    if (auth._id || auth._id.toString() !== user._id.toString()) {
+    if (!auth._id || auth._id.toString() !== user._id.toString()) {
         return (0, sendResponse_1.default)(res, {
             success: false,
             message: "forbiden access",

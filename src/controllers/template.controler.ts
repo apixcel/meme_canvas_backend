@@ -1,4 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
+import QueryBuilder from "../builder/QueryBuilder";
+import cloudinary from "../config/cloud";
 import catchAsyncError from "../middlewares/catchAsyncErrors";
 import Project from "../models/project.model";
 import Template from "../models/template.model";
@@ -15,6 +17,17 @@ export const chooseTemplate = catchAsyncError(async (req, res) => {
       data: null,
       success: false,
       statusCode: 400,
+    });
+  }
+
+  const alreadyChoosed = await Project.findOne({
+    template: isTemplateExists._id,
+  });
+  if (alreadyChoosed) {
+    return sendResponse(res, {
+      data: alreadyChoosed,
+      success: false,
+      message: "this template is already choosed",
     });
   }
 
@@ -59,13 +72,14 @@ export const createTemplate = catchAsyncError(async (req, res) => {
   }
 
   const { canvas, projectName, shapes, thumbnail } = project.toObject();
+  const cloudinaryResult = await cloudinary.uploader.upload(thumbnail);
 
   const result = await Template.create({
     canvas,
     owner: user._id,
     projectName: templateName || projectName,
     shapes,
-    thumbnail,
+    thumbnail: cloudinaryResult.secure_url,
   });
 
   sendResponse(res, {
@@ -77,12 +91,16 @@ export const createTemplate = catchAsyncError(async (req, res) => {
 });
 
 export const getAllTemplates = catchAsyncError(async (req, res) => {
-  const result = await Template.find().populate("owner").select("-shapes");
+  const query = Template.find().populate("owner").select("-shapes");
+  const builder = new QueryBuilder(query, req.query).search(["projectName"]);
+  const totalDoc = (await builder.count()).totalCount;
+  const result = await builder.modelQuery;
 
-  sendResponse(res, {
+  res.json({
     data: result,
-    message: "Project created form template",
+    message: "successfully get all template",
     success: true,
+    totalDoc,
   });
 });
 

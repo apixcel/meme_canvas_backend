@@ -88,7 +88,7 @@ export const updateProjectShapes = catchAsyncError(async (req, res) => {
       data: null,
     });
   }
-  
+
   const result = await Project.findByIdAndUpdate(
     id,
     {
@@ -217,7 +217,7 @@ export const deleteProject = catchAsyncError(async (req, res) => {
 
   const auth: any = isExist.toObject().user;
 
-  if (auth._id || auth._id.toString() !== user._id.toString()) {
+  if (!auth._id || auth._id.toString() !== user._id.toString()) {
     return sendResponse(res, {
       success: false,
       message: "forbiden access",

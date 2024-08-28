@@ -1,17 +1,18 @@
-import { FilterQuery, Query, Types } from "mongoose";
+import { FilterQuery, Query } from "mongoose";
 
 class QueryBuilder<T> {
   public modelQuery: Query<T[], T>;
   public query: Record<string, unknown>;
+  totalCount: number;
 
   constructor(modelQuery: Query<T[], T>, query: Record<string, unknown>) {
     this.modelQuery = modelQuery;
     this.query = query;
-    console.log("Initial query:", this.query);
+    this.totalCount = 0;
   }
 
   search(searchableFields: string[]) {
-    const searchTerm = this.query.searchTerm as string;
+    const searchTerm = this?.query?.searchTerm;
     if (searchTerm) {
       this.modelQuery = this.modelQuery.find({
         $or: searchableFields.map(
@@ -22,91 +23,56 @@ class QueryBuilder<T> {
         ),
       });
     }
+
     return this;
   }
 
   filter() {
     const queryObj = { ...this.query };
 
-    const excludeFields = [
-      "searchTerm",
-      "sort",
-      "limit",
-      "page",
-      "fields",
-      "minPrice",
-      "maxPrice",
-    ];
+    // Filtering
+    const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
+
     excludeFields.forEach((el) => delete queryObj[el]);
 
-    if (queryObj.category) {
-      queryObj.category = new Types.ObjectId(queryObj.category as string);
-    }
-
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    this.modelQuery = this.modelQuery.find(JSON.parse(queryStr));
-    console.log("Query after general filtering:", queryStr);
-
-    // Price filtering
-    if (this.query.minPrice || this.query.maxPrice) {
-      const priceFilter: Record<string, unknown> = {};
-      if (this.query.minPrice) {
-        priceFilter.$gte = Number(this.query.minPrice);
-      }
-      if (this.query.maxPrice) {
-        priceFilter.$lte = Number(this.query.maxPrice);
-      }
-      this.modelQuery = this.modelQuery.find({
-        price: priceFilter,
-      });
-    }
+    this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
 
     return this;
   }
 
   sort() {
-    let sortBy = "-createdAt";
-    if (this.query.sort) {
-      switch (this.query.sort) {
-        case "price-asc":
-          sortBy = "discountPrice";
-          break;
-        case "price-desc":
-          sortBy = "-discountPrice";
-          break;
-        case "rating":
-          sortBy = "-rating";
-          break;
-        default:
-          sortBy = this.query.sort as string;
-      }
-    }
-    this.modelQuery = this.modelQuery.sort(sortBy);
+    const sort =
+      (this?.query?.sort as string)?.split(",")?.join(" ") || "-createdAt";
+    this.modelQuery = this.modelQuery.sort(sort as string);
+
     return this;
   }
 
   paginate() {
-    const page = Number(this.query.page) || 1;
-    const limit = Number(this.query.limit) || 10;
+    const page = Number(this?.query?.page) || 1;
+    const limit = Number(this?.query?.limit) || 10;
     const skip = (page - 1) * limit;
 
     this.modelQuery = this.modelQuery.skip(skip).limit(limit);
+
     return this;
   }
 
   fields() {
     const fields =
-      (this.query.fields as string)?.split(",")?.join(" ") || "-__v";
+      (this?.query?.fields as string)?.split(",")?.join(" ") || "-__v";
+
     this.modelQuery = this.modelQuery.select(fields);
+    return this;
+  }
+
+  async count() {
+    const countQuery = this.modelQuery.model.countDocuments(
+      this.modelQuery.getFilter()
+    );
+    this.totalCount = await countQuery.exec();
     return this;
   }
 }
 
 export default QueryBuilder;
-
-// case "price-asc":
-//   sortBy = "discountPrice";
-//   break;
-// case "price-desc":
-//   sortBy = "-discountPrice";

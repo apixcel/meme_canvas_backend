@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
-const http_1 = __importDefault(require("http"));
 // import morgan from "morgan";
 const db_1 = __importDefault(require("./config/db"));
 const error_1 = __importDefault(require("./middlewares/error"));
@@ -19,7 +18,6 @@ app.use((0, cors_1.default)({
 (0, db_1.default)();
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-const server = http_1.default.createServer(app);
 app.get("/", (req, res) => res.send({ success: true }));
 app.use("/api/v1/", routes_1.default);
 // Middleware for Errors

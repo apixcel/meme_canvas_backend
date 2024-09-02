@@ -12,11 +12,17 @@ import {
   uploadImage,
 } from "../controllers/project.controller";
 import { isAuthenticatedUser } from "../middlewares/auth";
+import { checkPlanLimit } from "../middlewares/checkPlanLImit";
 import { upload } from "../utils/uploadFile";
 const router = Router();
 
 router.get("/get/:id", isAuthenticatedUser, getProjectById);
-router.post("/create", isAuthenticatedUser, createProjectController);
+router.post(
+  "/create",
+  isAuthenticatedUser,
+  checkPlanLimit,
+  createProjectController
+);
 router.put("/rename/:id", isAuthenticatedUser, renameProject);
 router.put("/update/:id", isAuthenticatedUser, updateProjectShapes);
 router.put(

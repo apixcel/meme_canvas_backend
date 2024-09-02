@@ -3,6 +3,7 @@ import cloudinary from "../config/cloud";
 import catchAsyncError from "../middlewares/catchAsyncErrors";
 import Image from "../models/image.model";
 import Project from "../models/project.model";
+import Subscription from "../models/subscription.model";
 import { getPublicId } from "../utils/getPublicId";
 import sendResponse from "../utils/sendResponse";
 import { sendImageToCloudinary } from "../utils/uploadFile";
@@ -56,6 +57,10 @@ export const createProjectController = catchAsyncError(async (req, res) => {
   const { body } = req;
   const user = req.user as JwtPayload;
   const result = await Project.create({ ...body, user: user._id });
+
+  await Subscription.findByIdAndUpdate(user.subscription, {
+    $inc: { currentCredit: -1 },
+  });
 
   sendResponse(res, {
     data: result,

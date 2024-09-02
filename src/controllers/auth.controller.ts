@@ -4,6 +4,8 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import catchAsyncError from "../middlewares/catchAsyncErrors";
 import Authentication from "../models/auth.model";
 
+import Plan from "../models/plan.model";
+import Subscription from "../models/subscription.model";
 import { createAcessToken, createRefreshToken } from "../utils/jwtToken";
 import sendMessage from "../utils/sendMessage";
 import sendResponse from "../utils/sendResponse";
@@ -25,6 +27,18 @@ export const createUserController = catchAsyncError(async (req, res) => {
   }
 
   const auth = await Authentication.create({ ...body });
+
+  const plan = await Plan.findOne({ price: 0 });
+  const subscription = await Subscription.create({
+    user: auth._id,
+    plan: plan?._id || "",
+    stripeSubscriptionId: "",
+    currentCredit: plan?.credit || 5,
+  });
+
+  await Authentication.findByIdAndUpdate(auth._id, {
+    subscription: subscription._id,
+  });
 
   const token = createAcessToken(
     {
@@ -113,10 +127,13 @@ export const loginController = catchAsyncError(async (req, res) => {
       statusCode: 404,
     });
   }
+  console.log(password, isExistUser.password);
+
   const isPasswordMatched = await bcrypt.compare(
     password,
     isExistUser.password
   );
+
   if (!isPasswordMatched) {
     return sendResponse(res, {
       message: "password didn't matched",

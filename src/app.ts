@@ -1,10 +1,12 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Application, NextFunction, Request, Response } from "express";
+import Stripe from "stripe";
 import connectDB from "./config/db";
 import errorMiddleware from "./middlewares/error";
 import routes from "./routes";
-// import morgan from "morgan";
+import { SubscriptionSeed } from "./helper/subscription";
+export const stripe = new Stripe(process.env.STRIPE_KEY as string);
 
 const app: Application = express();
 
@@ -18,6 +20,7 @@ app.use(
 
 // Connect to Database
 connectDB();
+SubscriptionSeed();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

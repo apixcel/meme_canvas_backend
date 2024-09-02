@@ -1,8 +1,10 @@
 import express from "express";
 import authRoute from "./auth.route";
+import planRoute from "./plan.route";
 import projectRoutes from "./project.route";
-import userRoute from "./user.route";
+import subscriptionRoute from "./subscription.route";
 import templateRoute from "./template.route";
+import userRoute from "./user.route";
 
 const router = express.Router();
 
@@ -18,6 +20,14 @@ const moduleRoute = [
   {
     path: "/user",
     route: userRoute,
+  },
+  {
+    path: "/plan",
+    route: planRoute,
+  },
+  {
+    path: "/subscription",
+    route: subscriptionRoute,
   },
   {
     path: "/template",

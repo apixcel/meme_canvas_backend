@@ -1,13 +1,14 @@
 import cors from "cors";
+import dotenv from "dotenv";
 import express, { Application, NextFunction, Request, Response } from "express";
-// import morgan from "morgan";
 import connectDB from "./config/db";
-
 import errorMiddleware from "./middlewares/error";
 import routes from "./routes";
+// import morgan from "morgan";
 
 const app: Application = express();
 
+dotenv.config();
 app.use(
   cors({
     origin: "*",

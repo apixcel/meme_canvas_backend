@@ -12,6 +12,7 @@ router.put("/update/:id", auth_1.isAuthenticatedUser, project_controller_1.updat
 router.put("/update-thumbnail/:id", auth_1.isAuthenticatedUser, uploadFile_1.upload.single("file"), project_controller_1.updateProjectThubnail);
 router.delete("/delete/:id", auth_1.isAuthenticatedUser, project_controller_1.deleteProject);
 router.get("/all", auth_1.isAuthenticatedUser, project_controller_1.getAllProjects);
+router.put("/update-canvas-color/:id", project_controller_1.updateProjectCanvasColor);
 router.post("/upload/image", auth_1.isAuthenticatedUser, uploadFile_1.upload.single("file"), project_controller_1.uploadImage);
 router.get("/images", auth_1.isAuthenticatedUser, project_controller_1.getAllImages);
 const projectRoutes = router;

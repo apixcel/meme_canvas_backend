@@ -161,6 +161,18 @@ export const updateProjectThubnail = catchAsyncError(async (req, res) => {
     success: true,
   });
 });
+export const updateProjectCanvasColor = catchAsyncError(async (req, res) => {
+  const { bgColor } = req.body;
+  const id = req.params.id;
+  const result = await Project.findByIdAndUpdate(id, {
+    $set: { "canvas.bgColor": bgColor },
+  });
+  sendResponse(res, {
+    data: result,
+    message: "Canvas color updated",
+    success: true,
+  });
+});
 export const renameProject = catchAsyncError(async (req, res) => {
   const { projectName } = req.body;
   const { id } = req.params;

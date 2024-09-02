@@ -4,12 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
-// import morgan from "morgan";
 const db_1 = __importDefault(require("./config/db"));
 const error_1 = __importDefault(require("./middlewares/error"));
 const routes_1 = __importDefault(require("./routes"));
+// import morgan from "morgan";
 const app = (0, express_1.default)();
+dotenv_1.default.config();
 app.use((0, cors_1.default)({
     origin: "*",
 }));

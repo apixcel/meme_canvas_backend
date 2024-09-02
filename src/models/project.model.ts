@@ -41,6 +41,7 @@ const ProjectSchema = new Schema(
       type: {
         width: { type: Number, required: true },
         height: { type: Number, required: true },
+        bgColor: { type: String, default: "#ffffff" },
       },
       required: true,
     },

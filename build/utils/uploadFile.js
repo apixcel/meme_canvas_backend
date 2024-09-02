@@ -4,14 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.upload = exports.sendImageToCloudinary = void 0;
-const fs_1 = __importDefault(require("fs"));
 const multer_1 = __importDefault(require("multer"));
 const cloud_1 = __importDefault(require("../config/cloud"));
-// Ensure the uploads directory exists
-const uploadsDir = process.cwd() + "/uploads/";
-if (!fs_1.default.existsSync(uploadsDir)) {
-    fs_1.default.mkdirSync(uploadsDir);
-}
 const sendImageToCloudinary = (imageName, path) => {
     return new Promise((resolve, reject) => {
         cloud_1.default.uploader.upload(path, { public_id: imageName }, function (error, result) {
@@ -20,21 +14,20 @@ const sendImageToCloudinary = (imageName, path) => {
             }
             resolve(result);
             // delete a file asynchronously
-            fs_1.default.unlink(path, (err) => {
-                if (err) {
-                    console.log(err);
-                }
-                else {
-                    console.log("File is deleted.");
-                }
-            });
+            // fs.unlink(path, (err) => {
+            //   if (err) {
+            //     console.log(err);
+            //   } else {
+            //     console.log("File is deleted.");
+            //   }
+            // });
         });
     });
 };
 exports.sendImageToCloudinary = sendImageToCloudinary;
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, uploadsDir);
+        cb(null, process.cwd() + "/uploads/");
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);

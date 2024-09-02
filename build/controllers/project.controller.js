@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllImages = exports.uploadImage = exports.deleteProject = exports.renameProject = exports.updateProjectThubnail = exports.updateProjectShapes = exports.createProjectController = exports.getProjectById = exports.getAllProjects = void 0;
+exports.getAllImages = exports.uploadImage = exports.deleteProject = exports.renameProject = exports.updateProjectCanvasColor = exports.updateProjectThubnail = exports.updateProjectShapes = exports.createProjectController = exports.getProjectById = exports.getAllProjects = void 0;
 const cloud_1 = __importDefault(require("../config/cloud"));
 const catchAsyncErrors_1 = __importDefault(require("../middlewares/catchAsyncErrors"));
 const image_model_1 = __importDefault(require("../models/image.model"));
@@ -138,6 +138,18 @@ exports.updateProjectThubnail = (0, catchAsyncErrors_1.default)((req, res) => __
     (0, sendResponse_1.default)(res, {
         data: result,
         message: "project thubmain updated successfuly",
+        success: true,
+    });
+}));
+exports.updateProjectCanvasColor = (0, catchAsyncErrors_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { bgColor } = req.body;
+    const id = req.params.id;
+    const result = yield project_model_1.default.findByIdAndUpdate(id, {
+        $set: { "canvas.bgColor": bgColor },
+    });
+    (0, sendResponse_1.default)(res, {
+        data: result,
+        message: "Canvas color updated",
         success: true,
     });
 }));

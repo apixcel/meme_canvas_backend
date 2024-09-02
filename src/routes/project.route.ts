@@ -6,6 +6,7 @@ import {
   getAllProjects,
   getProjectById,
   renameProject,
+  updateProjectCanvasColor,
   updateProjectShapes,
   updateProjectThubnail,
   uploadImage,
@@ -26,6 +27,7 @@ router.put(
 );
 router.delete("/delete/:id", isAuthenticatedUser, deleteProject);
 router.get("/all", isAuthenticatedUser, getAllProjects);
+router.put("/update-canvas-color/:id", updateProjectCanvasColor);
 router.post(
   "/upload/image",
   isAuthenticatedUser,

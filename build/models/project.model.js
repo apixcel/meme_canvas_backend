@@ -41,6 +41,7 @@ const ProjectSchema = new mongoose_1.Schema({
         type: {
             width: { type: Number, required: true },
             height: { type: Number, required: true },
+            bgColor: { type: String, default: "#ffffff" },
         },
         required: true,
     },

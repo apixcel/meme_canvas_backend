@@ -17,6 +17,7 @@ const cloud_1 = __importDefault(require("../config/cloud"));
 const catchAsyncErrors_1 = __importDefault(require("../middlewares/catchAsyncErrors"));
 const image_model_1 = __importDefault(require("../models/image.model"));
 const project_model_1 = __importDefault(require("../models/project.model"));
+const subscription_model_1 = __importDefault(require("../models/subscription.model"));
 const getPublicId_1 = require("../utils/getPublicId");
 const sendResponse_1 = __importDefault(require("../utils/sendResponse"));
 const uploadFile_1 = require("../utils/uploadFile");
@@ -61,6 +62,9 @@ exports.createProjectController = (0, catchAsyncErrors_1.default)((req, res) => 
     const { body } = req;
     const user = req.user;
     const result = yield project_model_1.default.create(Object.assign(Object.assign({}, body), { user: user._id }));
+    yield subscription_model_1.default.findByIdAndUpdate(user.subscription, {
+        $inc: { currentCredit: -1 },
+    });
     (0, sendResponse_1.default)(res, {
         data: result,
         message: "project created successfuly",

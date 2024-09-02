@@ -42,6 +42,15 @@ const AuthenticationSchema = new mongoose_1.default.Schema({
         required: false,
         default: "",
     },
+    stripeCustomerId: {
+        type: String,
+        required: false,
+    },
+    subscription: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: "Subscription",
+        required: false,
+    },
 }, { timestamps: true });
 AuthenticationSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

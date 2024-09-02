@@ -28,6 +28,8 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const catchAsyncErrors_1 = __importDefault(require("../middlewares/catchAsyncErrors"));
 const auth_model_1 = __importDefault(require("../models/auth.model"));
+const plan_model_1 = __importDefault(require("../models/plan.model"));
+const subscription_model_1 = __importDefault(require("../models/subscription.model"));
 const jwtToken_1 = require("../utils/jwtToken");
 const sendMessage_1 = __importDefault(require("../utils/sendMessage"));
 const sendResponse_1 = __importDefault(require("../utils/sendResponse"));
@@ -46,6 +48,16 @@ exports.createUserController = (0, catchAsyncErrors_1.default)((req, res) => __a
         });
     }
     const auth = yield auth_model_1.default.create(Object.assign({}, body));
+    const plan = yield plan_model_1.default.findOne({ price: 0 });
+    const subscription = yield subscription_model_1.default.create({
+        user: auth._id,
+        plan: (plan === null || plan === void 0 ? void 0 : plan._id) || "",
+        stripeSubscriptionId: "",
+        currentCredit: (plan === null || plan === void 0 ? void 0 : plan.credit) || 5,
+    });
+    yield auth_model_1.default.findByIdAndUpdate(auth._id, {
+        subscription: subscription._id,
+    });
     const token = (0, jwtToken_1.createAcessToken)({
         email: auth.email,
         _id: auth._id.toString(),
@@ -119,6 +131,7 @@ exports.loginController = (0, catchAsyncErrors_1.default)((req, res) => __awaite
             statusCode: 404,
         });
     }
+    console.log(password, isExistUser.password);
     const isPasswordMatched = yield bcrypt_1.default.compare(password, isExistUser.password);
     if (!isPasswordMatched) {
         return (0, sendResponse_1.default)(res, {
